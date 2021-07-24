@@ -19,6 +19,12 @@ defmodule MemeCacheBot.Store.MemeStore do
     |> Repo.insert()
   end
 
+  def count_memes(opts \\ []) do
+    Meme
+    |> maybe_where_telegram_id(opts[:telegram_id])
+    |> Repo.aggregate(:count, :id)
+  end
+
   # Private
   defp maybe_where_telegram_id(query, nil), do: query
 

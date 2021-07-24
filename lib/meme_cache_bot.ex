@@ -1,18 +1,9 @@
 defmodule MemeCacheBot do
-  @moduledoc """
-  Documentation for `MemeCacheBot`.
-  """
+  alias MemeCacheBot.Store.MemeStore
+  alias MemeCacheBot.MessageFormatter
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> MemeCacheBot.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def count_memes(telegram_id) do
+    MemeStore.count_memes(telegram_id: telegram_id)
+    |> MessageFormatter.format_count_message()
   end
 end
