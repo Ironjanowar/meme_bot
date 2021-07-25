@@ -17,7 +17,7 @@ defmodule MemeCacheBot.Store.MemeStore do
     Meme
     |> maybe_where_telegram_id(opts[:telegram_id])
     |> where_page(opts[:page])
-    |> order()
+    |> maybe_order_by(desc_nulls_last: :last_used)
     |> Repo.all()
   end
 
@@ -52,8 +52,6 @@ defmodule MemeCacheBot.Store.MemeStore do
   end
 
   # Private
-  defp order(query), do: order_by(query, desc_nulls_last: :last_used)
-
   defp where_page(query, nil), do: where_page(query, 0)
 
   defp where_page(query, page) do
@@ -64,16 +62,8 @@ defmodule MemeCacheBot.Store.MemeStore do
   defp page_to_offset(page) when page <= 0, do: 0
   defp page_to_offset(page), do: (page - 1) * 50
 
-  defp maybe_where_telegram_id(query, nil), do: query
-
-  defp maybe_where_telegram_id(query, telegram_id) when is_integer(telegram_id),
-    do: where(query, telegram_id: ^telegram_id)
-
   defp maybe_where_meme_unique_id(query, nil), do: query
 
   defp maybe_where_meme_unique_id(query, meme_unique_id) when is_binary(meme_unique_id),
     do: where(query, meme_unique_id: ^meme_unique_id)
-
-  defp maybe_preload(query, nil), do: query
-  defp maybe_preload(query, preload) when is_atom(preload), do: preload(query, ^preload)
 end

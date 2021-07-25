@@ -1,5 +1,5 @@
 defmodule MemeCacheBot.Store.UserStore do
-  import Ecto.Query
+  import MemeCacheBot.Store
   alias MemeCacheBot.Repo
   alias MemeCacheBot.Model.User
 
@@ -33,19 +33,4 @@ defmodule MemeCacheBot.Store.UserStore do
     find_users(preload: :memes)
     |> Enum.max_by(&length(&1.memes))
   end
-
-  # Private
-  defp maybe_limit(query, nil), do: query
-  defp maybe_limit(query, limit), do: limit(query, ^limit)
-
-  defp maybe_order_by(query, nil), do: query
-  defp maybe_order_by(query, order), do: order_by(query, ^order)
-
-  defp maybe_where_telegram_id(query, nil), do: query
-
-  defp maybe_where_telegram_id(query, telegram_id) when is_integer(telegram_id),
-    do: where(query, telegram_id: ^telegram_id)
-
-  defp maybe_preload(query, nil), do: query
-  defp maybe_preload(query, preload) when is_atom(preload), do: preload(query, ^preload)
 end
