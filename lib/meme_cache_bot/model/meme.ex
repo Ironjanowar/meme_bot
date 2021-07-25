@@ -23,5 +23,13 @@ defmodule MemeCacheBot.Model.Meme do
     |> Changeset.cast(meme_map, @fields)
     |> Changeset.put_assoc(:user, meme_map[:user])
     |> Changeset.validate_required(@required_fields)
+    |> Changeset.unique_constraint([:meme_unique_id, :telegram_id], name: :meme_user_unique_index)
+  end
+
+  def build(%{} = meme_map) do
+    meme_map
+    |> insert_changeset()
+    |> Changeset.apply_action(:insert)
+    |> elem(1)
   end
 end
