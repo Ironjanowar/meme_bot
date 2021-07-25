@@ -14,6 +14,7 @@ defmodule MemeCacheBot.Bot do
   middleware(MemeCacheBot.Middlewares.RegisterUser)
 
   alias MemeCacheBot.MessageFormatter
+  alias MemeCacheBot.Utils
 
   def bot(), do: @bot
 
@@ -45,4 +46,24 @@ defmodule MemeCacheBot.Bot do
     {message, opts} = MemeCacheBot.apply_meme_action(uuid, from, message)
     edit(context, :inline, message, opts)
   end
+
+  def handle({:inline_query, %{query: text, from: from}}, context) do
+    {articles, opts} = MemeCacheBot.get_meme_articles(text, from)
+    answer_inline_query(context, articles, opts)
+  end
+
+  def handle({:update, %{chosen_inline_result: message}}, _) do
+    MemeCacheBot.update_last_used(message)
+  end
+
+  # Admins only
+  def handle({:command, "stats", %{from: %{id: telegram_id}}}, context) do
+    if Utils.is_admin(telegram_id) do
+      {message, opts} = MemeCacheBot.get_stats()
+      answer(context, message, opts)
+    end
+  end
+
+  def handle(_, _), do: :ignore
+  def handle(_), do: :ignore
 end

@@ -1,5 +1,14 @@
 defmodule MemeCacheBot.MessageFormatter do
   alias MemeCacheBot.Utils
+  alias MemeCacheBot.Model.Meme
+
+  alias ExGram.Model.{
+    InlineQueryResultCachedGif,
+    InlineQueryResultCachedPhoto,
+    InlineQueryResultCachedSticker,
+    InlineQueryResultCachedVideo,
+    InlineQueryResultCachedVoice
+  }
 
   def help_command do
     text = """
@@ -69,7 +78,7 @@ defmodule MemeCacheBot.MessageFormatter do
 
   def unrecognized_meme_format(%{message_id: message_id}) do
     text = "Sorry I don't recognize that as a meme :("
-    {text, [reply_to_message_id: message_id]}
+    {text, reply_to_message_id: message_id}
   end
 
   def unknown_error() do
@@ -77,7 +86,55 @@ defmodule MemeCacheBot.MessageFormatter do
     {text, []}
   end
 
+  def get_inline_articles(memes) do
+    articles = memes |> Enum.map(&get_inline_article/1) |> Enum.reject(&is_nil/1)
+    {articles, [is_personal: true, cache_time: 0]}
+  end
+
+  def format_stats(meme_count, user_count, meme_master) do
+    text = """
+    Total users: **#{user_count}**
+    Total memes: **#{meme_count}**
+
+    #{format_meme_master(meme_master)}
+    """
+
+    {text, parse_mode: "Markdown"}
+  end
+
   # Private
+  defp format_meme_master(nil), do: "No meme master :("
+  defp format_meme_master(meme_master), do: "Da Meme Master: @#{meme_master.username}"
+
+  defp type_struct("gif"), do: {:ok, InlineQueryResultCachedGif, :gif_file_id, %{}}
+  defp type_struct("photo"), do: {:ok, InlineQueryResultCachedPhoto, :photo_file_id, %{}}
+  defp type_struct("sticker"), do: {:ok, InlineQueryResultCachedSticker, :sticker_file_id, %{}}
+
+  defp type_struct("voice"),
+    do: {:ok, InlineQueryResultCachedVoice, :voice_file_id, %{title: "Voice Message Meme"}}
+
+  defp type_struct("video"),
+    do: {:ok, InlineQueryResultCachedVideo, :video_file_id, %{title: "Meme"}}
+
+  defp type_struct(invalid_type), do: {:error, :invalid_type, invalid_type}
+
+  defp get_inline_article(%Meme{} = meme) do
+    case type_struct(meme.meme_type) do
+      {:ok, struct_module, file_param, extras} ->
+        params =
+          %{type: meme.meme_type, id: meme.meme_unique_id}
+          |> Map.put(file_param, meme.meme_id)
+          |> Map.merge(extras)
+
+        struct(struct_module, params)
+
+      _ ->
+        nil
+    end
+  end
+
+  defp get_inline_article(_), do: nil
+
   defp meme_message(text, %{message_id: message_id}, uuid) do
     keyboard = Utils.generate_buttons(uuid)
     {text, [reply_markup: keyboard, reply_to_message_id: message_id]}

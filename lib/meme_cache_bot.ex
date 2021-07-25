@@ -3,6 +3,7 @@ defmodule MemeCacheBot do
   alias MemeCacheBot.MessageFormatter
   alias MemeCacheBot.Model.Meme
   alias MemeCacheBot.Steps
+  alias MemeCacheBot.Utils
 
   require Logger
 
@@ -32,6 +33,37 @@ defmodule MemeCacheBot do
         Logger.error("Tried to get step for UUID #{inspect(uuid)}. Got: #{inspect(error)}")
         MessageFormatter.unknown_error()
     end
+  end
+
+  def get_meme_articles(text, %{id: telegram_id}) do
+    page = Utils.get_page_from_text(text)
+
+    MemeStore.find_memes(telegram_id: telegram_id, page: page)
+    |> MessageFormatter.get_inline_articles()
+  end
+
+  def update_last_used(%{from: %{id: telegram_id}, result_id: meme_unique_id}) do
+    case MemeStore.find_meme(meme_unique_id: meme_unique_id, telegram_id: telegram_id) do
+      nil ->
+        Logger.error(
+          "Could not find meme #{inspect(meme_unique_id)} to update last used for user #{inspect(telegram_id)}"
+        )
+
+        :error
+
+      meme ->
+        now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+        MemeStore.update_meme(meme, %{last_used: now})
+        :ok
+    end
+  end
+
+  def get_stats() do
+    meme_count = MemeStore.count_memes()
+    user_count = UserStore.count_users()
+    meme_master = UserStore.get_meme_master()
+
+    MessageFormatter.format_stats(meme_count, user_count, meme_master)
   end
 
   # Private

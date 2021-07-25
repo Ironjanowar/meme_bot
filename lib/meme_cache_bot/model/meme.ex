@@ -26,6 +26,12 @@ defmodule MemeCacheBot.Model.Meme do
     |> Changeset.unique_constraint([:meme_unique_id, :telegram_id], name: :meme_user_unique_index)
   end
 
+  @updatable_fields [:last_used]
+  def update_changeset(%Meme{} = meme, changes) do
+    changes = Map.take(changes, @updatable_fields)
+    Changeset.change(meme, changes)
+  end
+
   def build(%{} = meme_map) do
     meme_map
     |> insert_changeset()
