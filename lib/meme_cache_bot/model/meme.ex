@@ -10,13 +10,14 @@ defmodule MemeCacheBot.Model.Meme do
     field(:meme_unique_id, :string)
     field(:meme_type, :string)
     field(:last_used, :naive_datetime)
+    field(:tags, {:array, :string})
 
     belongs_to(:user, User, references: :telegram_id, type: :integer, foreign_key: :telegram_id)
 
     timestamps()
   end
 
-  @fields [:meme_id, :meme_unique_id, :meme_type, :last_used]
+  @fields [:meme_id, :meme_unique_id, :meme_type, :last_used, :tags]
   @required_fields [:meme_id, :meme_unique_id, :meme_type]
   def insert_changeset(%{} = meme_map) do
     %Meme{}
@@ -26,7 +27,7 @@ defmodule MemeCacheBot.Model.Meme do
     |> Changeset.unique_constraint([:meme_unique_id, :telegram_id], name: :meme_user_unique_index)
   end
 
-  @updatable_fields [:last_used]
+  @updatable_fields [:last_used, :tags]
   def update_changeset(%Meme{} = meme, changes) do
     changes = Map.take(changes, @updatable_fields)
     Changeset.change(meme, changes)
@@ -35,7 +36,6 @@ defmodule MemeCacheBot.Model.Meme do
   def build(%{} = meme_map) do
     meme_map
     |> insert_changeset()
-    |> Changeset.apply_action(:insert)
-    |> elem(1)
+    |> Changeset.apply_action!(:insert)
   end
 end
