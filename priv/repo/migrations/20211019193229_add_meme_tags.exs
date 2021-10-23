@@ -3,7 +3,7 @@ defmodule MemeCacheBot.Repo.Migrations.AddMemeTags do
 
   def change do
     alter table(:memes) do
-      add :tags, {:array, :string}
+      add :tags, {:array, :text}
     end
   end
 end
