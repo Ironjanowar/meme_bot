@@ -6,7 +6,7 @@ defmodule MemeCacheBot.Model.User do
 
   @primary_key {:id, :binary_id, autogenerate: true}
   schema "users" do
-    field(:telegram_id, :integer, null: false)
+    field(:telegram_id, :integer)
     field(:first_name, :string)
     field(:username, :string)
 

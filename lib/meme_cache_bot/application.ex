@@ -9,6 +9,8 @@ defmodule MemeCacheBot.Application do
   def start(_type, _args) do
     token = ExGram.Config.get(:ex_gram, :token)
 
+    MemeCacheBot.Telemetry.attach_all()
+
     children = [
       {MemeCacheBot.Repo, []},
       MemeCacheBot.Steps,
