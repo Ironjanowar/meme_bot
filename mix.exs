@@ -5,7 +5,7 @@ defmodule MemeCacheBot.MixProject do
     [
       app: :meme_cache_bot,
       version: "0.1.0",
-      elixir: "~> 1.12",
+      elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -23,12 +23,12 @@ defmodule MemeCacheBot.MixProject do
   defp deps do
     [
       {:ex_gram, "~> 0.23"},
-      {:tesla, "~> 1.4"},
-      {:hackney, "~> 1.17"},
-      {:jason, "~> 1.2"},
+      {:tesla, "~> 1.8"},
+      {:hackney, "~> 1.20"},
+      {:jason, "~> 1.4"},
       {:logger_file_backend, "0.0.11"},
-      {:ecto_sql, "~> 3.5"},
-      {:postgrex, "~> 0.15"},
+      {:ecto_sql, "~> 3.11"},
+      {:postgrex, "~> 0.17"},
       {:credo, "~> 1.2", only: [:dev, :test], runtime: false},
       {:uuid, "~> 1.1"}
     ]
