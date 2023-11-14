@@ -2,7 +2,7 @@ defmodule MemeCacheBot.Repo.Migrations.CreateMemesTable do
   use Ecto.Migration
 
   def change do
-    create table(:memes, primary_key: false) do
+    create_if_not_exists table(:memes, primary_key: false) do
       add(:id, :binary_id, primary_key: true, default: fragment("uuid_generate_v4()"))
       add(:meme_id, :string)
       add(:meme_unique_id, :string)
@@ -13,6 +13,6 @@ defmodule MemeCacheBot.Repo.Migrations.CreateMemesTable do
       timestamps()
     end
 
-    create(unique_index(:memes, [:meme_unique_id, :telegram_id], name: :meme_user_unique_index))
+    create_if_not_exists(unique_index(:memes, [:meme_unique_id, :telegram_id], name: :meme_user_unique_index))
   end
 end
