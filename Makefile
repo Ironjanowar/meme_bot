@@ -11,7 +11,10 @@ export BOT_TOKEN = $(shell cat bot.token)
 export ADMINS = $(shell cat admins)
 
 start: token
-	_build/dev/rel/meme_cache_bot/bin/meme_cache_bot daemon
+	_build/$(MIX_ENV)/rel/meme_cache_bot/bin/meme_cache_bot start
+
+daemon: token
+	_build/$(MIX_ENV)/rel/meme_cache_bot/bin/meme_cache_bot daemon
 
 iex: token
 	iex -S mix
@@ -24,16 +27,16 @@ purge: clean
 	rm mix.lock
 
 stop:
-	_build/dev/rel/meme_cache_bot/bin/meme_cache_bot stop
+	_build/$(MIX_ENV)/rel/meme_cache_bot/bin/meme_cache_bot stop
 
 attach:
-	_build/dev/rel/meme_cache_bot/bin/meme_cache_bot remote
+	_build/$(MIX_ENV)/rel/meme_cache_bot/bin/meme_cache_bot remote
 
 release: deps compile
 	mix release
 
 debug: token
-	_build/dev/rel/meme_cache_bot/bin/meme_cache_bot console
+	_build/$(MIX_ENV)/rel/meme_cache_bot/bin/meme_cache_bot console
 
 error_logs:
 	tail -n 20 -f log/error.log
