@@ -1,0 +1,26 @@
+[Unit]
+Description=Meme Cache Telegram bot
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/cuwano/apps/meme_bot
+Environment=LANG=C.UTF-8
+Environment=RELEASE_TMP=%t/meme_cache_bot
+EnvironmentFile=/home/cuwano/.config/meme_cache_bot/env
+ExecStart=/home/cuwano/apps/meme_bot/_build/prod/rel/meme_cache_bot/bin/meme_cache_bot start
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+UMask=0077
+RuntimeDirectory=meme_cache_bot
+RuntimeDirectoryMode=0700
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/cuwano/.local/share/meme_cache_bot
+
+[Install]
+WantedBy=default.target

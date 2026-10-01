@@ -9,16 +9,19 @@ defmodule MemeCacheBot.Application do
   def start(_type, _args) do
     token = ExGram.Config.get(:ex_gram, :token)
 
-    children = [
-      {MemeCacheBot.Repo, []},
-      MemeCacheBot.Steps,
-      ExGram,
-      {MemeCacheBot.Bot, [method: :polling, token: token]}
-    ]
+    children =
+      [{MemeCacheBot.Repo, []}, MemeCacheBot.Steps] ++
+        bot_children(Application.fetch_env!(:meme_cache_bot, :start_bot), token)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: MemeCacheBot.Supervisor]
     Supervisor.start_link(children, opts)
   end
+
+  defp bot_children(true, token) do
+    [ExGram, {MemeCacheBot.Bot, [method: :polling, token: token]}]
+  end
+
+  defp bot_children(false, _token), do: []
 end

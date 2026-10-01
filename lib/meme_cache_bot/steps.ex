@@ -19,12 +19,12 @@ defmodule MemeCacheBot.Steps do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
-  def add_step(meme_info, action) do
-    GenServer.call(__MODULE__, {:add_step, action, meme_info})
+  def add_step(meme_info, action, user_id) do
+    GenServer.call(__MODULE__, {:add_step, action, meme_info, user_id})
   end
 
-  def get_step(uuid) do
-    GenServer.call(__MODULE__, {:get_step, uuid})
+  def take_step(uuid, user_id) do
+    GenServer.call(__MODULE__, {:take_step, uuid, user_id})
   end
 
   # Server callbacks
@@ -39,24 +39,27 @@ defmodule MemeCacheBot.Steps do
     {:noreply, %{first_gen: %{}, second_gen: first_gen}}
   end
 
-  def handle_call({:add_step, action, meme}, _from, %{
+  def handle_call({:add_step, action, meme, user_id}, _from, %{
         first_gen: first_gen,
         second_gen: second_gen
       }) do
     uuid = UUID.uuid4()
-    new_first_gen = Map.put(first_gen, uuid, %{meme: meme, action: action})
+    new_first_gen = Map.put(first_gen, uuid, %{meme: meme, action: action, user_id: user_id})
     {:reply, uuid, %{first_gen: new_first_gen, second_gen: second_gen}}
   end
 
   def handle_call(
-        {:get_step, uuid},
+        {:take_step, uuid, user_id},
         _from,
         %{first_gen: first_gen, second_gen: second_gen} = state
       ) do
     case get_from_generations(uuid, first_gen, second_gen) do
-      %{meme: meme, action: action} = data ->
-        new_first_gen = Map.put(first_gen, uuid, data)
-        {:reply, {:ok, meme, action}, %{first_gen: new_first_gen, second_gen: second_gen}}
+      %{user_id: ^user_id, meme: meme, action: action} ->
+        new_state = delete_from_generations(state, uuid)
+        {:reply, {:ok, meme, action}, new_state}
+
+      %{user_id: _other_user_id} ->
+        {:reply, {:error, :forbidden}, state}
 
       _ ->
         {:reply, {:error, :not_found}, state}
@@ -69,5 +72,12 @@ defmodule MemeCacheBot.Steps do
       :not_found -> Map.get(second_gen, uuid)
       found -> found
     end
+  end
+
+  defp delete_from_generations(state, uuid) do
+    %{
+      first_gen: Map.delete(state.first_gen, uuid),
+      second_gen: Map.delete(state.second_gen, uuid)
+    }
   end
 end
