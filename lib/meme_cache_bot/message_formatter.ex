@@ -161,7 +161,27 @@ defmodule MemeCacheBot.MessageFormatter do
     {text, parse_mode: "Markdown"}
   end
 
+  def format_top_users(users) do
+    rows =
+      users
+      |> Enum.with_index(1)
+      |> Enum.map_join("\n", fn {user, rank} ->
+        "#{rank}. #{format_top_user_name(user)} — #{format_meme_count(user.meme_count)}"
+      end)
+
+    {"Top users\n\n#{rows}", []}
+  end
+
   # Private
+  defp format_meme_count(1), do: "1 meme"
+  defp format_meme_count(count), do: "#{count} memes"
+
+  defp format_top_user_name(%{first_name: first_name, username: nil}), do: first_name
+
+  defp format_top_user_name(%{first_name: first_name, username: username}) do
+    "#{first_name} @#{username}"
+  end
+
   defp format_tags([]), do: "none"
   defp format_tags(tags), do: Enum.join(tags, ", ")
 

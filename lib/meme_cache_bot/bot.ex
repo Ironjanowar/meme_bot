@@ -78,6 +78,13 @@ defmodule MemeCacheBot.Bot do
     end
   end
 
+  def handle({:command, "top", %{from: %{id: telegram_id}}}, context) do
+    if Utils.admin?(telegram_id) do
+      {message, opts} = MemeCacheBot.get_top_users()
+      answer(context, message, opts)
+    end
+  end
+
   def handle(_, _), do: :ignore
   def handle(_), do: :ignore
 end
