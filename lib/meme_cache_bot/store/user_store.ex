@@ -1,7 +1,9 @@
 defmodule MemeCacheBot.Store.UserStore do
+  @moduledoc false
+
   import MemeCacheBot.Store
-  alias MemeCacheBot.Repo
   alias MemeCacheBot.Model.User
+  alias MemeCacheBot.Repo
 
   def find_user(opts \\ []) do
     User
@@ -30,11 +32,11 @@ defmodule MemeCacheBot.Store.UserStore do
   defp to_params(%_{} = struct), do: Map.from_struct(struct)
   defp to_params(user_params), do: Map.new(user_params)
 
-  def count_users() do
+  def count_users do
     Repo.aggregate(User, :count, :id)
   end
 
-  def get_meme_master() do
+  def get_meme_master do
     find_users(preload: :memes)
     |> Enum.max_by(&length(&1.memes), fn -> nil end)
   end

@@ -7,7 +7,8 @@ defmodule MemeCacheBot.MixProject do
       version: "0.1.0",
       elixir: "~> 1.20",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      aliases: aliases()
     ]
   end
 
@@ -20,6 +21,10 @@ defmodule MemeCacheBot.MixProject do
   end
 
   # Run "mix help deps" to learn about dependencies.
+  defp aliases do
+    ["ecto.reset": ["ecto.drop", "ecto.create", "ecto.migrate"]]
+  end
+
   defp deps do
     [
       {:ex_gram, "~> 0.70.1"},

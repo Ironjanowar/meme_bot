@@ -10,7 +10,7 @@ defmodule MemeCacheBot.Application do
     token = ExGram.Config.get(:ex_gram, :token)
 
     children =
-      [{MemeCacheBot.Repo, []}, MemeCacheBot.Steps] ++
+      [{MemeCacheBot.Repo, []}, MemeCacheBot.Steps, MemeCacheBot.TagEditSessions] ++
         bot_children(Application.fetch_env!(:meme_cache_bot, :start_bot), token)
 
     # See https://hexdocs.pm/elixir/Supervisor.html

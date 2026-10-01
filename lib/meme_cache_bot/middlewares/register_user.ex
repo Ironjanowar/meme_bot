@@ -1,4 +1,6 @@
 defmodule MemeCacheBot.Middlewares.RegisterUser do
+  @moduledoc false
+
   use ExGram.Middleware
 
   alias ExGram.Cnt

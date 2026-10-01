@@ -1,8 +1,8 @@
 defmodule MemeCacheBot.Model.User do
   use Ecto.Schema
 
-  alias MemeCacheBot.Model.{User, Meme}
   alias Ecto.Changeset
+  alias MemeCacheBot.Model.{Meme, User}
 
   @primary_key {:id, :binary_id, autogenerate: true}
   schema "users" do

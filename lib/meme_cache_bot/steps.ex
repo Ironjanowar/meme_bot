@@ -1,4 +1,6 @@
 defmodule MemeCacheBot.Steps do
+  @moduledoc false
+
   use GenServer
 
   # 1 hour
