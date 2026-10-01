@@ -20,10 +20,15 @@ defmodule MemeCacheBot.Store.UserStore do
 
   def insert_user(user_params) do
     user_params
-    |> Map.new()
+    |> to_params()
     |> User.insert_changeset()
     |> Repo.insert()
   end
+
+  # The registration middleware forwards a Telegram user struct, which Map.new/1
+  # cannot enumerate.
+  defp to_params(%_{} = struct), do: Map.from_struct(struct)
+  defp to_params(user_params), do: Map.new(user_params)
 
   def count_users() do
     Repo.aggregate(User, :count, :id)

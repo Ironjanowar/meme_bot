@@ -35,6 +35,24 @@ defmodule MemeCacheBot.StoreTest do
     assert UserStore.get_meme_master() == nil
   end
 
+  test "returns a changeset error instead of raising for a duplicate telegram id" do
+    assert {:ok, _user} = UserStore.insert_user(%{telegram_id: 4242, first_name: "Ada"})
+    assert {:ok, _user} = UserStore.insert_user(%{telegram_id: 4243, first_name: "Grace"})
+
+    assert {:error, changeset} = UserStore.insert_user(%{telegram_id: 4242, first_name: "Ada"})
+    assert "has already been taken" in errors_on(changeset).telegram_id
+  end
+
+  test "accepts the Telegram user struct passed by the registration middleware" do
+    telegram_user = %ExGram.Model.User{id: 7, first_name: "Cuwano", username: "Cuwano"}
+    params = Map.put(telegram_user, :telegram_id, telegram_user.id)
+
+    assert {:ok, user} = UserStore.insert_user(params)
+    assert user.telegram_id == 7
+    assert user.first_name == "Cuwano"
+    assert user.username == "Cuwano"
+  end
+
   defp errors_on(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {message, opts} ->
       Regex.replace(~r"%{(\w+)}", message, fn _, key ->
