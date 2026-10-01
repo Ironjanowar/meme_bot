@@ -39,6 +39,13 @@ defmodule MemeCacheBot.Bot do
     answer(context, message, opts)
   end
 
+  def handle({:text, _text, message}, context) do
+    case MemeCacheBot.process_pending_tag_message(message) do
+      :not_pending -> :ignore
+      {response, opts} -> answer(context, response, opts)
+    end
+  end
+
   def handle({:message, message}, context) do
     {message, opts} =
       case MemeCacheBot.process_pending_tag_message(message) do

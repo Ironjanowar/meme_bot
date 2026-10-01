@@ -103,6 +103,24 @@ defmodule MemeCacheBot.FlowTest do
     assert {:ok, _session} = TagEditSessions.get(105)
   end
 
+  test "routes ExGram text updates into a pending tag edit" do
+    {:ok, user} = UserStore.insert_user(%{telegram_id: 114, first_name: "Maya"})
+    meme = insert_meme!(user, "text-update")
+    TagEditSessions.start(114, %{meme_id: meme.id})
+
+    message = %ExGram.Model.Message{
+      from: %ExGram.Model.User{id: 114, first_name: "Maya"},
+      message_id: 47,
+      text: "maia, hmm"
+    }
+
+    assert %ExGram.Cnt{} =
+             MemeCacheBot.Bot.handle({:text, "maia, hmm", message}, %ExGram.Cnt{})
+
+    assert MemeStore.list_tags(meme) == ["hmm", "maia"]
+    assert :none = TagEditSessions.get(114)
+  end
+
   test "a pending edit for a deleted meme is closed as unavailable" do
     assert {:ok, _token} = TagEditSessions.start(112, %{meme_id: Ecto.UUID.generate()})
 
