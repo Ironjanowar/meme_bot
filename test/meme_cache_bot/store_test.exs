@@ -35,6 +35,14 @@ defmodule MemeCacheBot.StoreTest do
     assert UserStore.get_meme_master() == nil
   end
 
+  test "returns a changeset error instead of raising for a duplicate telegram id" do
+    assert {:ok, _user} = UserStore.insert_user(%{telegram_id: 4242, first_name: "Ada"})
+    assert {:ok, _user} = UserStore.insert_user(%{telegram_id: 4243, first_name: "Grace"})
+
+    assert {:error, changeset} = UserStore.insert_user(%{telegram_id: 4242, first_name: "Ada"})
+    assert "has already been taken" in errors_on(changeset).telegram_id
+  end
+
   defp errors_on(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {message, opts} ->
       Regex.replace(~r"%{(\w+)}", message, fn _, key ->

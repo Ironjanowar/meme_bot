@@ -34,16 +34,19 @@ set -a
 set +a
 
 export MIX_ENV=prod
-/usr/local/bin/mise install
-/usr/local/bin/mise exec -- mix local.hex --force
-/usr/local/bin/mise exec -- mix local.rebar --force
-/usr/local/bin/mise exec -- mix deps.get --only prod
-/usr/local/bin/mise exec -- mix compile --warnings-as-errors
-/usr/local/bin/mise exec -- mix ecto.create
-/usr/local/bin/mise exec -- mix ecto.migrate
+export PATH="$HOME/.local/bin:$PATH"
+mise install
+mise exec -- mix local.hex --force
+mise exec -- mix local.rebar --force
+mise exec -- mix deps.get --only prod
+mise exec -- mix compile --warnings-as-errors
+mise exec -- mix ecto.create
+mise exec -- mix ecto.migrate
 chmod 600 "$DATABASE_PATH"
-/usr/local/bin/mise exec -- mix release --overwrite
+mise exec -- mix release --overwrite
 ```
+
+`mise` installs under `~/.local/bin`, which is not on `PATH` in non-interactive SSH shells. Use `mise exec -- mix ...` rather than `mix ...` here: `mise install` alone does not put `mix` on `PATH`, and a missing `mix` fails the build.
 
 ## Install and start the service
 

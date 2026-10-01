@@ -21,5 +21,6 @@ defmodule MemeCacheBot.Model.User do
     %User{}
     |> Changeset.cast(user_map, @fields)
     |> Changeset.validate_required(@required_fields)
+    |> Changeset.unique_constraint(:telegram_id)
   end
 end
