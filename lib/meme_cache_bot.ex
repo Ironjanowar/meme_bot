@@ -99,6 +99,11 @@ defmodule MemeCacheBot do
     MessageFormatter.format_stats(meme_count, user_count, meme_master)
   end
 
+  def get_top_users do
+    UserStore.top_users()
+    |> MessageFormatter.format_top_users()
+  end
+
   # Private
   defp inline_query_options("", telegram_id), do: [telegram_id: telegram_id, page: 1]
 
