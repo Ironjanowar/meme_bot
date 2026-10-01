@@ -7,7 +7,8 @@ defmodule MemeCacheBot.MessageFormatter do
     InlineQueryResultCachedPhoto,
     InlineQueryResultCachedSticker,
     InlineQueryResultCachedVideo,
-    InlineQueryResultCachedVoice
+    InlineQueryResultCachedVoice,
+    ReplyParameters
   }
 
   def help_command do
@@ -53,32 +54,32 @@ defmodule MemeCacheBot.MessageFormatter do
 
   def meme_saved(%{message_id: message_id}) do
     text = "Meme saved!"
-    {text, reply_to_message_id: message_id}
+    {text, reply_parameters: reply_parameters(message_id)}
   end
 
   def meme_already_saved(%{message_id: message_id}) do
     text = "That meme was already saved!"
-    {text, reply_to_message_id: message_id}
+    {text, reply_parameters: reply_parameters(message_id)}
   end
 
   def can_not_save_meme(%{message_id: message_id}) do
     text = "Sorry I could not save your meme :("
-    {text, reply_to_message_id: message_id}
+    {text, reply_parameters: reply_parameters(message_id)}
   end
 
   def meme_deleted(%{message_id: message_id}) do
     text = "Meme deleted!"
-    {text, reply_to_message_id: message_id}
+    {text, reply_parameters: reply_parameters(message_id)}
   end
 
   def can_not_delete_meme(%{message_id: message_id}) do
     text = "Sorry I could not delete your meme :("
-    {text, reply_to_message_id: message_id}
+    {text, reply_parameters: reply_parameters(message_id)}
   end
 
   def unrecognized_meme_format(%{message_id: message_id}) do
     text = "Sorry I don't recognize that as a meme :("
-    {text, reply_to_message_id: message_id}
+    {text, reply_parameters: reply_parameters(message_id)}
   end
 
   def unknown_error() do
@@ -137,6 +138,8 @@ defmodule MemeCacheBot.MessageFormatter do
 
   defp meme_message(text, %{message_id: message_id}, uuid) do
     keyboard = Utils.generate_buttons(uuid)
-    {text, [reply_markup: keyboard, reply_to_message_id: message_id]}
+    {text, [reply_markup: keyboard, reply_parameters: reply_parameters(message_id)]}
   end
+
+  defp reply_parameters(message_id), do: %ReplyParameters{message_id: message_id}
 end

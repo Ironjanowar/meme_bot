@@ -22,8 +22,15 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 spotify_uri_bot-*.tar
 
-# Ignore tokens
+# Ignore tokens and private environment files
 *.token
+*_token
+.env
+
+# Ignore SQLite databases and write-ahead log files
+*.db
+*.db-shm
+*.db-wal
 
 # Ignore logs folder
 log/

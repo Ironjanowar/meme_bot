@@ -18,7 +18,7 @@ defmodule MemeCacheBot.Utils do
     end
   end
 
-  def is_admin(user_id) do
+  def admin?(user_id) do
     case ExGram.Config.get(:meme_cache_bot, :admins) |> Jason.decode() do
       {:ok, admins} ->
         user_id in admins

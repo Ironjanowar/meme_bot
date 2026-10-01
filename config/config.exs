@@ -1,31 +1,23 @@
 import Config
 
 config :meme_cache_bot, MemeCacheBot.Repo,
-  database: "meme_cache_bot_repo",
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost"
+  database: Path.expand("../meme_cache_bot.db", __DIR__),
+  pool_size: 1,
+  busy_timeout: 5_000,
+  journal_mode: :wal,
+  foreign_keys: :on
 
 config :meme_cache_bot,
-  ecto_repos: [MemeCacheBot.Repo]
-
-config :meme_cache_bot,
-  admins: {:system, "ADMINS"}
+  ecto_repos: [MemeCacheBot.Repo],
+  admins: {:system, "ADMINS"},
+  start_bot: true
 
 config :ex_gram,
-  token: {:system, "BOT_TOKEN"}
+  token: {:system, "BOT_TOKEN"},
+  adapter: ExGram.Adapter.Req
 
 config :logger,
   level: :debug,
-  truncate: :infinity,
-  backends: [{LoggerFileBackend, :debug}, {LoggerFileBackend, :error}]
+  truncate: :infinity
 
-config :logger, :debug,
-  path: "log/debug.log",
-  level: :debug,
-  format: "$dateT$timeZ [$level] $message\n"
-
-config :logger, :error,
-  path: "log/error.log",
-  level: :error,
-  format: "$dateT$timeZ [$level] $message\n"
+import_config "#{config_env()}.exs"

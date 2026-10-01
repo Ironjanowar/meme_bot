@@ -58,7 +58,7 @@ defmodule MemeCacheBot.Bot do
 
   # Admins only
   def handle({:command, "stats", %{from: %{id: telegram_id}}}, context) do
-    if Utils.is_admin(telegram_id) do
+    if Utils.admin?(telegram_id) do
       {message, opts} = MemeCacheBot.get_stats()
       answer(context, message, opts)
     end

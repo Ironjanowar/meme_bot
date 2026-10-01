@@ -28,13 +28,19 @@ If you have more than 50 memes you'll have more than one page of memes, write th
 
 ## Deploy your own meme bot
 
-- Create a `bot.token` file with a bot token in the root of the project
-- Compile the bot executing `make compile`
-- Create and migrate a database with `make db_setup`, check the `config/config.exs` file to set up your own database
-- Execute the bot opening an `iex` interpreter with `make iex`
-- (Optional) Create a release with `make release`
-- (Optional) Execute the release with `make start` and stop it with `make stop`
+MemeCacheBot requires Erlang 29.1.1 and Elixir 1.20.4 (pinned in `.tool-versions`). It uses SQLite; no PostgreSQL server is required.
 
-The logs will be written into files, to see the logs execute:
- - `make debug_logs` to show all the logs
- - `make error_logs` to show error level logs only
+1. Export the required environment variables:
+   - `BOT_TOKEN`: Telegram bot token.
+   - `ADMINS`: JSON array of numeric Telegram user IDs, for example `[]`.
+   - `DATABASE_PATH`: required in production; path to the SQLite database.
+2. Install dependencies and initialize the database with `make db_setup`.
+3. Run locally with `make iex`, or build a production release with `make release`.
+
+For the hardened `systemd --user` deployment used on Coco, see [`deploy/README.md`](deploy/README.md). Production logs are written to journald and can be read with:
+
+```bash
+journalctl --user -u meme-cache-bot.service -f
+```
+
+This release intentionally starts with a fresh SQLite database; it does not migrate existing PostgreSQL data.

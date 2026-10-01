@@ -20,7 +20,7 @@ defmodule MemeCacheBot do
   end
 
   def apply_meme_action(uuid, from, message) do
-    case Steps.get_step(uuid) do
+    case Steps.take_step(uuid, from.id) do
       {:ok, meme, :add} ->
         save_meme(meme, from, message)
 
@@ -98,11 +98,11 @@ defmodule MemeCacheBot do
        ) do
     case MemeStore.find_meme(telegram_id: telegram_id, meme_unique_id: meme_unique_id) do
       nil ->
-        uuid = Steps.add_step(meme, :add)
+        uuid = Steps.add_step(meme, :add, telegram_id)
         MessageFormatter.add_meme_message(message, uuid)
 
       meme ->
-        uuid = Steps.add_step(meme, :delete)
+        uuid = Steps.add_step(meme, :delete, telegram_id)
         MessageFormatter.delete_meme_message(message, uuid)
     end
   end

@@ -1,59 +1,40 @@
-MIX_ENV?=dev
+MIX_ENV ?= dev
+
+.PHONY: deps compile test format check release db_setup db_reset iex
 
 deps:
 	mix deps.get
-	mix deps.compile
+
 compile: deps
-	mix compile
+	mix compile --warnings-as-errors
 
-token:
-export BOT_TOKEN = $(shell cat bot.token)
-export ADMINS = $(shell cat admins)
+test:
+	mix test
 
-start: token
-	_build/$(MIX_ENV)/rel/meme_cache_bot/bin/meme_cache_bot start
+format:
+	mix format
 
-daemon: token
-	_build/$(MIX_ENV)/rel/meme_cache_bot/bin/meme_cache_bot daemon
+check:
+	MIX_ENV=dev mix deps.get
+	MIX_ENV=dev mix format --check-formatted
+	MIX_ENV=dev mix compile --warnings-as-errors
+	MIX_ENV=dev mix credo --strict --min-priority high
+	MIX_ENV=test mix test
+	MIX_ENV=dev mix hex.audit
 
-iex: token
-	iex -S mix
+release:
+	MIX_ENV=prod mix deps.get --only prod
+	MIX_ENV=prod mix compile --warnings-as-errors
+	MIX_ENV=prod mix release --overwrite
 
-clean:
-	rm -rf _build
-
-purge: clean
-	rm -rf deps
-	rm mix.lock
-
-stop:
-	_build/$(MIX_ENV)/rel/meme_cache_bot/bin/meme_cache_bot stop
-
-attach:
-	_build/$(MIX_ENV)/rel/meme_cache_bot/bin/meme_cache_bot remote
-
-release: deps compile
-	mix release
-
-debug: token
-	_build/$(MIX_ENV)/rel/meme_cache_bot/bin/meme_cache_bot console
-
-error_logs:
-	tail -n 20 -f log/error.log
-
-debug_logs:
-	tail -n 20 -f log/debug.log
-
-db_setup: compile
+db_setup:
 	mix ecto.create
 	mix ecto.migrate
 
-db_reset: compile
+db_reset:
 	mix ecto.drop
 	mix ecto.create
 	mix ecto.migrate
 
-code_check: compile
-	mix credo --strict
-
-.PHONY: deps compile release start clean purge token iex stop attach debug db_setup db_reset code_check
+iex:
+	iex -S mix

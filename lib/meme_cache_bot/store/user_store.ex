@@ -31,6 +31,6 @@ defmodule MemeCacheBot.Store.UserStore do
 
   def get_meme_master() do
     find_users(preload: :memes)
-    |> Enum.max_by(&length(&1.memes))
+    |> Enum.max_by(&length(&1.memes), fn -> nil end)
   end
 end

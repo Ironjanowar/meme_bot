@@ -26,7 +26,7 @@ defmodule MemeCacheBot.Model.Meme do
     |> Changeset.put_change(:last_used, now)
     |> Changeset.put_assoc(:user, meme_map[:user])
     |> Changeset.validate_required(@required_fields)
-    |> Changeset.unique_constraint([:meme_unique_id, :telegram_id], name: :meme_user_unique_index)
+    |> Changeset.unique_constraint([:meme_unique_id, :telegram_id])
   end
 
   @updatable_fields [:last_used]
