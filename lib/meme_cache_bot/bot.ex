@@ -1,4 +1,6 @@
 defmodule MemeCacheBot.Bot do
+  @moduledoc false
+
   @bot :meme_cache_bot
 
   use ExGram.Bot,
@@ -16,7 +18,7 @@ defmodule MemeCacheBot.Bot do
   alias MemeCacheBot.MessageFormatter
   alias MemeCacheBot.Utils
 
-  def bot(), do: @bot
+  def bot, do: @bot
 
   def handle({:command, :start, _msg}, context) do
     answer(context, "Hi!")
@@ -38,7 +40,12 @@ defmodule MemeCacheBot.Bot do
   end
 
   def handle({:message, message}, context) do
-    {message, opts} = MemeCacheBot.process_message(message)
+    {message, opts} =
+      case MemeCacheBot.process_pending_tag_message(message) do
+        :not_pending -> MemeCacheBot.process_message(message)
+        response -> response
+      end
+
     answer(context, message, opts)
   end
 

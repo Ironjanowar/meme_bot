@@ -1,8 +1,8 @@
 defmodule MemeCacheBot.Model.Meme do
   use Ecto.Schema
 
-  alias MemeCacheBot.Model.{User, Meme}
   alias Ecto.Changeset
+  alias MemeCacheBot.Model.{Meme, MemeTag, User}
 
   @primary_key {:id, :binary_id, autogenerate: true}
   schema "memes" do
@@ -12,6 +12,7 @@ defmodule MemeCacheBot.Model.Meme do
     field(:last_used, :naive_datetime)
 
     belongs_to(:user, User, references: :telegram_id, type: :integer, foreign_key: :telegram_id)
+    has_many(:tags, MemeTag)
 
     timestamps()
   end

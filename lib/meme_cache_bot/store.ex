@@ -1,4 +1,6 @@
 defmodule MemeCacheBot.Store do
+  @moduledoc false
+
   import Ecto.Query
 
   def maybe_limit(query, nil), do: query

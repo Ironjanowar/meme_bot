@@ -1,6 +1,8 @@
 defmodule MemeCacheBot.MessageFormatter do
-  alias MemeCacheBot.Utils
+  @moduledoc false
+
   alias MemeCacheBot.Model.Meme
+  alias MemeCacheBot.Utils
 
   alias ExGram.Model.{
     InlineQueryResultCachedGif,
@@ -21,7 +23,9 @@ defmodule MemeCacheBot.MessageFormatter do
 
     If you don't have it, I'll ask if you want to save it!
 
-    If you already have that meme, I'll ask if you want to delete it.
+    After saving, use Edit tags to add personal one-word tags separated by commas.
+    Resend a saved meme to delete it or edit its tags.
+    In inline mode, type tags separated by spaces or commas; each result matches any tag.
     """
 
     {text, []}
@@ -52,9 +56,32 @@ defmodule MemeCacheBot.MessageFormatter do
     meme_message(text, message, uuid)
   end
 
+  def existing_meme_message(%{message_id: message_id}, tags, delete_uuid, edit_uuid) do
+    text = "You already have that meme saved. Current tags: #{format_tags(tags)}"
+    keyboard = Utils.existing_meme_keyboard(delete_uuid, edit_uuid)
+    {text, [reply_markup: keyboard, reply_parameters: reply_parameters(message_id)]}
+  end
+
+  def tag_edit_prompt(tags, cancel_uuid) do
+    text = """
+    Current tags: #{format_tags(tags)}
+    Send one-word tags separated by commas.
+    """
+
+    {text, reply_markup: Utils.cancel_keyboard(cancel_uuid)}
+  end
+
   def meme_saved(%{message_id: message_id}) do
     text = "Meme saved!"
     {text, reply_parameters: reply_parameters(message_id)}
+  end
+
+  def meme_saved(%{message_id: message_id}, edit_uuid) do
+    text = "Meme saved!"
+
+    {text,
+     reply_markup: Utils.edit_tags_keyboard(edit_uuid),
+     reply_parameters: reply_parameters(message_id)}
   end
 
   def meme_already_saved(%{message_id: message_id}) do
@@ -77,12 +104,43 @@ defmodule MemeCacheBot.MessageFormatter do
     {text, reply_parameters: reply_parameters(message_id)}
   end
 
+  def tags_saved(%{message_id: message_id}, tags) do
+    {"Tags saved: #{format_tags(tags)}", reply_parameters: reply_parameters(message_id)}
+  end
+
+  def tag_validation_error(%{message_id: message_id}, _error) do
+    text = "Invalid tags. Send 1-20 one-word, non-numeric tags of at most 32 characters."
+    {text, reply_parameters: reply_parameters(message_id)}
+  end
+
+  def tags_require_text(%{message_id: message_id}) do
+    {"Please send the tags in a text message.", reply_parameters: reply_parameters(message_id)}
+  end
+
+  def tag_edit_canceled do
+    {"Tag editing canceled. No changes were made.", []}
+  end
+
+  def tag_edit_expired do
+    {"This tag editing session is no longer active.", []}
+  end
+
+  def tag_edit_unavailable(%{message_id: message_id}) do
+    {"That meme is no longer available. Tag editing was closed.",
+     reply_parameters: reply_parameters(message_id)}
+  end
+
+  def can_not_save_tags(%{message_id: message_id}) do
+    {"Sorry, I could not save those tags. Open Edit tags and try again.",
+     reply_parameters: reply_parameters(message_id)}
+  end
+
   def unrecognized_meme_format(%{message_id: message_id}) do
     text = "Sorry I don't recognize that as a meme :("
     {text, reply_parameters: reply_parameters(message_id)}
   end
 
-  def unknown_error() do
+  def unknown_error do
     text = "Sorry there was an unexpected error :("
     {text, []}
   end
@@ -104,6 +162,9 @@ defmodule MemeCacheBot.MessageFormatter do
   end
 
   # Private
+  defp format_tags([]), do: "none"
+  defp format_tags(tags), do: Enum.join(tags, ", ")
+
   defp format_meme_master(nil), do: "No meme master :("
   defp format_meme_master(meme_master), do: "Da Meme Master: @#{meme_master.username}"
 
@@ -137,7 +198,7 @@ defmodule MemeCacheBot.MessageFormatter do
   defp get_inline_article(_), do: nil
 
   defp meme_message(text, %{message_id: message_id}, uuid) do
-    keyboard = Utils.generate_buttons(uuid)
+    keyboard = Utils.save_keyboard(uuid)
     {text, [reply_markup: keyboard, reply_parameters: reply_parameters(message_id)]}
   end
 

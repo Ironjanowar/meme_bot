@@ -13,10 +13,11 @@ Send a meme in any of these formats:
 If you don't have the meme saved, the bot will ask if you want to save it
 ![Save Button](./docs/images/save_button.png)
 
-If you have the meme saved, the bot will ask if you want to delete it
+If you have the meme saved, the bot shows its current personal tags and lets you delete it or choose **Edit tags**.
+Tags are private to your copy of the meme. Send 1–20 one-word tags, separated by commas; tags are normalized to lowercase and replace the previous list.
 ![Delete Button](./docs/images/delete_button.png)
 
-Once you have a meme saved, you just need to use the bot inline. Write in any chat `@meme_cache_bot` and It will show you your cached memes!
+Once you have a meme saved, use the bot inline. Write `@meme_cache_bot` in any chat to show your cached memes, or add one or more tags separated by spaces or commas to search. A multi-tag search matches any supplied tag (OR) and never returns another user's memes.
 
 <img src="./docs/images/use_inline.jpg" width="400">
 
