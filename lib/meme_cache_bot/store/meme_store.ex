@@ -94,9 +94,14 @@ defmodule MemeCacheBot.Store.MemeStore do
   defp maybe_where_tags(query, []), do: where(query, [meme], false)
 
   defp maybe_where_tags(query, tags) do
+    tag_matches =
+      Enum.reduce(tags, dynamic(false), fn search_term, matches ->
+        dynamic([_meme, tag], ^matches or fragment("instr(?, ?) > 0", tag.tag, ^search_term))
+      end)
+
     query
     |> join(:inner, [meme], tag in MemeTag, on: tag.meme_id == meme.id)
-    |> where([_meme, tag], tag.tag in ^tags)
+    |> where(^tag_matches)
     |> distinct(true)
   end
 

@@ -25,7 +25,7 @@ defmodule MemeCacheBot.MessageFormatter do
 
     After saving, use Edit tags to add personal one-word tags separated by commas.
     Resend a saved meme to delete it or edit its tags.
-    In inline mode, type tags separated by spaces or commas; each result matches any tag.
+    In inline mode, type search terms separated by spaces or commas; each result matches any tag containing a search term.
     """
 
     {text, []}

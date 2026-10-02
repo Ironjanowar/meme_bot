@@ -47,9 +47,9 @@ defmodule MemeCacheBot.MessageFormatterTest do
              opts[:reply_markup].inline_keyboard
   end
 
-  test "help explains personal tag editing and inline OR search" do
+  test "help explains personal tag editing and inline partial OR search" do
     assert {text, []} = MessageFormatter.help_command()
     assert text =~ "Edit tags"
-    assert text =~ "matches any tag"
+    assert text =~ "matches any tag containing a search term"
   end
 end
