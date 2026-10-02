@@ -197,6 +197,65 @@ defmodule MemeCacheBot.FlowTest do
     assert opts[:is_personal]
   end
 
+  test "inline tag search matches case-insensitive substrings at any position" do
+    user = insert_user!(115)
+    courage = insert_meme!(user, "inline-courage")
+    MemeStore.replace_tags(courage, ["coraje"])
+
+    {prefix_articles, _opts} = MemeCacheBot.get_meme_articles("CORA", %{id: 115})
+    {interior_articles, _opts} = MemeCacheBot.get_meme_articles("RAJ", %{id: 115})
+
+    assert {
+             Enum.map(prefix_articles, & &1.id),
+             Enum.map(interior_articles, & &1.id)
+           } == {["inline-courage"], ["inline-courage"]}
+  end
+
+  test "one-character partial terms keep OR matching within the requesting user" do
+    user = insert_user!(116)
+    courage = insert_meme!(user, "one-char-courage")
+    happy = insert_meme!(user, "one-char-happy")
+    foreign = 117 |> insert_user!() |> insert_meme!("one-char-foreign")
+    MemeStore.replace_tags(courage, ["coraje"])
+    MemeStore.replace_tags(happy, ["feliz"])
+    MemeStore.replace_tags(foreign, ["cielo"])
+
+    {articles, _opts} = MemeCacheBot.get_meme_articles("c z", %{id: 116})
+
+    assert articles |> Enum.map(& &1.id) |> Enum.sort() == ["one-char-courage", "one-char-happy"]
+  end
+
+  test "SQL wildcard characters in partial tag searches are literal" do
+    user = insert_user!(118)
+    percent = insert_meme!(user, "literal-percent")
+    underscore = insert_meme!(user, "literal-underscore")
+    unrelated = insert_meme!(user, "literal-unrelated")
+    MemeStore.replace_tags(percent, ["100%real"])
+    MemeStore.replace_tags(underscore, ["under_score"])
+    MemeStore.replace_tags(unrelated, ["ordinary"])
+
+    {percent_articles, _opts} = MemeCacheBot.get_meme_articles("%", %{id: 118})
+    {underscore_articles, _opts} = MemeCacheBot.get_meme_articles("_", %{id: 118})
+
+    assert {
+             Enum.map(percent_articles, & &1.id),
+             Enum.map(underscore_articles, & &1.id)
+           } == {["literal-percent"], ["literal-underscore"]}
+  end
+
+  test "partial tag search returns at most 50 results" do
+    user = insert_user!(119)
+
+    for index <- 1..51 do
+      meme = insert_meme!(user, "partial-limit-#{index}")
+      MemeStore.replace_tags(meme, ["coraje-#{index}"])
+    end
+
+    {articles, _opts} = MemeCacheBot.get_meme_articles("cora", %{id: 119})
+
+    assert length(articles) == 50
+  end
+
   test "empty and positive numeric inline queries preserve recent pagination" do
     user = insert_user!(109)
     base = ~N[2026-01-01 00:00:00]
